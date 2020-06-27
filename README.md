@@ -28,4 +28,12 @@ We could use an RDBMS database, maybe in master-slave configuration to improve r
 On the other hand, we don't need to do complex queries on data, we just need the contests results of a single user to visulise them into a graph. A key-value storage with possibility of setting complex values structure (multicolumn, nested types) is probably enough.  
 Since there are no additional constrains, the availability of the storage types on Cloud providers, the costs, the integration effort and the "it's cool :D" factor will be taken into consideration.  
 
-
+#### Redis storage
+Some preliminary tests can be executed on Redis storage. It is available on Azure and it can be easily integrate with Python scripts. This is a good starting point to learn more: https://docs.microsoft.com/en-us/azure/azure-cache-for-redis/cache-python-get-started  
+The VisualStudioProfessional Azure subscription includes 50 CHF/months. A Redis Cache instance with 250 MB on Azure is below this cost and it should be enought for the initial tests.  
+I think to start with a simple configuration where the LeetCode UserID will be the key and the single contests results will be stored into a **list** data type. More information about the Pythonic way to manage Redis lists here: https://pythontic.com/database/redis/list
+Since Redis doesn't support nested types, the single contest results will be encoded in JSON format, like:
+```
+user:1: [{"contestId": "1", "timestamp": "1111111111", "finishTime": "666", "score": "12", "rank": "888" },
+         {"contestId": "2", "timestamp": "2222222222", "finishTime": "777", "score": "23", "rank": "999"}]
+```
