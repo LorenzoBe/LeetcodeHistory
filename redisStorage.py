@@ -21,10 +21,10 @@ class RedisStorage(StorageInterface):
         self.redisClient.set(self.contestKeyPrefix + contestTitle, details)
         return True
 
-    def getContest(self, contestTitle: str) -> list:
+    def getContest(self, contestTitle: str) -> str:
         return self.redisClient.get(self.contestKeyPrefix + contestTitle)
 
-    def deleteContest(self, contestTitle: str) -> list:
+    def deleteContest(self, contestTitle: str) -> bool:
         return self.redisClient.delete(self.contestKeyPrefix + contestTitle)
 
     def addContestResult(self, username: str, result: str) -> bool:

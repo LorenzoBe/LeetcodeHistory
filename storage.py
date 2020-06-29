@@ -3,11 +3,11 @@ class StorageInterface:
         """Add a contest."""
         pass
 
-    def getContest(self, contestTitle: str) -> list:
+    def getContest(self, contestTitle: str) -> str:
         """Return the contest details."""
         pass
 
-    def deleteContest(self, contestTitle: str) -> list:
+    def deleteContest(self, contestTitle: str) -> bool:
         """Delete the contest"""
         pass
 

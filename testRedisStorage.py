@@ -5,7 +5,30 @@ from redisStorage import RedisStorage
 
 class TestRedisStorage(unittest.TestCase):
 
-    def test_insert_result(self):
+    def test_insert_contest(self):
+        redis = RedisStorage()
+
+        contestDetails = {
+            'title': 'Biweekly Contest 29',
+            'start_time': '1593268200'
+        }
+        contestTitle = contestDetails['title']
+
+        # delete any previous record
+        redis.deleteContest(contestTitle)
+
+        # tore the contest
+        redis.addContest(contestTitle, json.dumps(contestDetails))
+
+        # download and compare
+        recreatedData =  json.loads(redis.getContest(contestTitle).decode())
+        self.assertEqual(contestDetails, recreatedData)
+
+        # delete the record
+        self.assertTrue(redis.deleteContest(contestTitle))
+
+
+    def test_insert_user_contests(self):
         redis = RedisStorage()
 
         username = 'terence'
