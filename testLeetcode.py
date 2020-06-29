@@ -18,7 +18,8 @@ class TestLeetcode(unittest.TestCase):
         res, contest = lcc.getContestDetails(contestUri)
         self.assertTrue(res)
 
-        results = '{} {}\n'.format(contest['title'], time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(contest['start_time'])))
+        # later use: time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(contest['start_time']
+        results = contest['title'] + " -> " + lcc.contestToJson(contest) + "\n"
         print(results)
 
     # test the get and parse of context results
@@ -31,11 +32,13 @@ class TestLeetcode(unittest.TestCase):
 
         results = ""
         for user in rank:
-            results += '{} {} {} {}\n'.format(user['rank'], user['username'], user['score'], user['finish_time'])
+            username, result = lcc.resultToJson('bw29', user)
+            results += username + " -> " + result + "\n"
         print(results)
         self.assertEqual(25, len(rank))
 
     # test the get and parse all context results
+    @unittest.skip("too long to get all the results")
     def test_get_all_contest_results(self):
         contestUri = "https://leetcode.com/contest/api/ranking/biweekly-contest-29"
         lcc = LeetCodeCrawler()

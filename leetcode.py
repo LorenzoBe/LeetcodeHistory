@@ -49,3 +49,23 @@ class LeetCodeCrawler:
             time.sleep(0.001)
 
         return fullRank
+
+    def contestToJson(self, contestData):
+        pyData = {}
+        pyData['t'] = contestData['title']
+        pyData['st'] = contestData['start_time']
+
+        jsonData = json.dumps(pyData)
+        return jsonData
+
+    def resultToJson(self, contestId, result):
+        username = result['username']
+
+        pyResult = {}
+        pyResult['id'] = contestId
+        pyResult['r'] = result['rank']
+        pyResult['s'] = result['score']
+        pyResult['ft'] = result['finish_time']
+
+        jsonResult = json.dumps(pyResult)
+        return username, jsonResult
