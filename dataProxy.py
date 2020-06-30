@@ -6,7 +6,7 @@ from leetcode import PageSniffer
 from leetcode import LeetCodeCrawler
 from redisStorage import RedisStorage
 
-class DataPusher():
+class DataProxy():
 
     def __init__(self, config: ConfigParser):
         self.config = config
@@ -23,9 +23,12 @@ class DataPusher():
 
         # get and store the contest rank
         ranks = self.leetcode.getContestRankFull(contestId)
-        
+
         for userRank in ranks:
             username, result = self.leetcode.resultToJson(contestId, userRank)
             self.redis.addContestResult(username, json.dumps(result))
-        
+
         return True
+
+    def getUser(self, username: str) -> list:
+        return self.redis.getAllContestsResults(username)

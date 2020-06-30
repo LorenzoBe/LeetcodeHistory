@@ -3,8 +3,9 @@ from flask import Flask
 from flask import request
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
+import json
 
-from dataPusher import DataPusher
+from dataProxy import DataProxy
 from leetcode import Contest
 
 app = Flask(__name__)
@@ -24,19 +25,35 @@ def verify_password(username, password):
 
 @app.route('/addContest')
 @auth.login_required
-def hello():
+def addContest():
     contestType = request.args.get('type', default = 'standard', type = str)
     contestId = request.args.get('id', type = int)
 
     if (contestType != None and contestId != None):
-        dataPusher = DataPusher(config)
+        dataProxy = DataProxy(config)
         res = False
 
         if contestType == 'standard':
-            res = dataPusher.pushContest(Contest.STANDARD, contestId)
+            res = dataProxy.pushContest(Contest.STANDARD, contestId)
         elif contestType == 'biweekly':
-            res = dataPusher.pushContest(Contest.BIWEEKLY, contestId)
+            res = dataProxy.pushContest(Contest.BIWEEKLY, contestId)
 
         return "Function executed: " + str(res)
 
     return "Errors in GET arguments. Required: 'type' and 'id'"
+
+@app.route('/getUser')
+@auth.login_required
+def getUser():
+    username = request.args.get('username', type = str)
+
+    if (username != None):
+        dataProxy = DataProxy(config)
+        userRanks = dataProxy.getUser(username)
+
+        result = []
+        for rank in  userRanks:
+            result.append(rank.decode())
+        return json.dumps(result)
+
+    return "Errors in GET arguments. Required: 'username'"

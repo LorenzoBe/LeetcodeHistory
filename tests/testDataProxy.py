@@ -2,15 +2,15 @@ import sys
 import unittest
 
 sys.path.append('../')
-from dataPusher import DataPusher
+from dataProxy import DataProxy
 from leetcode import Contest
 
 class TestDataPusher(unittest.TestCase):
 
     def test_contest_upload(self):
-        dataPusher = DataPusher()
+        dataProxy = DataProxy()
 
-        res = dataPusher.pushContest(Contest.BIWEEKLY, 29)
+        res = dataProxy.pushContest(Contest.BIWEEKLY, 29)
         self.assertTrue(res)
 
 if __name__ == '__main__':
