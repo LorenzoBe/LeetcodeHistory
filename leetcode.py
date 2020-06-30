@@ -1,6 +1,7 @@
 import json
 import requests
 import time
+from enum import Enum
 
 class PageSniffer:
 
@@ -12,9 +13,18 @@ class PageSniffer:
 
         return True, response.text
 
+class Contest(Enum):
+    STANDARD = 1
+    BIWEEKLY = 2
+
 class LeetCodeCrawler:
 
-    def getContestDetails(self, uri):
+    def __init__(self):
+        self.contestInfoUri = "https://leetcode.com/contest/api/info/"
+        self.contestRankingUri = "https://leetcode.com/contest/api/ranking/"
+
+    def getContestDetails(self, contestId):
+        uri = self.contestInfoUri + contestId
         res, text = PageSniffer.getPageText(uri)
 
         if not res:
@@ -23,8 +33,8 @@ class LeetCodeCrawler:
         contest = json.loads(text)['contest']
         return True, contest
 
-    def getContestRankPage(self, uri, page):
-        fullUri = '{}/{}{}{}'.format(uri, '?pagination=', page, '&region=global')
+    def getContestRankPage(self, contestId, page):
+        fullUri = '{}{}/{}{}{}'.format(self.contestRankingUri, contestId, '?pagination=', page, '&region=global')
         print(fullUri)
         res, text = PageSniffer.getPageText(fullUri)
 
@@ -34,13 +44,13 @@ class LeetCodeCrawler:
         rank = json.loads(text)
         return True, rank['total_rank']
 
-    def getContestRankFull(self, uri):
-        page = 1
+    def getContestRankFull(self, contestId, startPage = 1):
+        page = startPage
         fullRank = []
         res = True
 
         while res:
-            res, rank = self.getContestRankPage(uri, page)
+            res, rank = self.getContestRankPage(contestId, page)
             if not res or len(rank) == 0:
                 break
 
@@ -69,3 +79,11 @@ class LeetCodeCrawler:
 
         jsonResult = json.dumps(pyResult)
         return username, jsonResult
+
+    def generateContestId(self, type: Contest, id: int):
+        if type == Contest.STANDARD:
+            return 'weekly-contest-{}'.format(id)
+        elif type == Contest.BIWEEKLY:
+            return 'biweekly-contest-{}'.format(id)
+
+        return str(id)
