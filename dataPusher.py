@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 import json
 
 from leetcode import Contest
@@ -7,9 +8,10 @@ from redisStorage import RedisStorage
 
 class DataPusher():
 
-    def __init__(self):
-        self.leetcode = LeetCodeCrawler()
-        self.redis = RedisStorage()
+    def __init__(self, config: ConfigParser):
+        self.config = config
+        self.leetcode = LeetCodeCrawler(config)
+        self.redis = RedisStorage(config)
 
     def pushContest(self, type: Contest, id: int) -> bool:
         contestId = self.leetcode.generateContestId(type, id)
@@ -20,7 +22,7 @@ class DataPusher():
         self.redis.addContest(contestId, self.leetcode.contestToJson(contest))
 
         # get and store the contest rank
-        ranks = self.leetcode.getContestRankFull(contestId, 315)
+        ranks = self.leetcode.getContestRankFull(contestId)
         
         for userRank in ranks:
             username, result = self.leetcode.resultToJson(contestId, userRank)

@@ -1,4 +1,4 @@
-import configparser
+from configparser import ConfigParser
 import json
 import redis
 
@@ -6,9 +6,8 @@ from storage import StorageInterface
 
 class RedisStorage(StorageInterface):
 
-    def __init__(self):
-        self.config = configparser.ConfigParser()
-        self.config.read('config.ini')
+    def __init__(self, config: ConfigParser):
+        self.config = config
         redisHostname = self.config['Azure']['RedisHostname']
         redisKey = self.config['Azure']['RedisKey']
 

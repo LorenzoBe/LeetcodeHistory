@@ -1,0 +1,9 @@
+click==6.7
+Flask==1.0.2
+Flask_HTTPAuth==4.1.0
+itsdangerous==0.24
+Jinja2==2.10
+MarkupSafe==1.0
+redis==3.5.3
+requests==2.24.0
+Werkzeug==0.14.1

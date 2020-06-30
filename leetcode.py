@@ -1,7 +1,8 @@
+from configparser import ConfigParser
+from enum import Enum
 import json
 import requests
 import time
-from enum import Enum
 
 class PageSniffer:
 
@@ -19,7 +20,8 @@ class Contest(Enum):
 
 class LeetCodeCrawler:
 
-    def __init__(self):
+    def __init__(self, config: ConfigParser):
+        self.config = config
         self.contestInfoUri = "https://leetcode.com/contest/api/info/"
         self.contestRankingUri = "https://leetcode.com/contest/api/ranking/"
 

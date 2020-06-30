@@ -37,3 +37,24 @@ Since Redis doesn't support nested types, the single contest results will be enc
 user:1: [{"contestId": "1", "timestamp": "1111111111", "finishTime": "666", "score": "12", "rank": "888" },
          {"contestId": "2", "timestamp": "2222222222", "finishTime": "777", "score": "23", "rank": "999"}]
 ```
+
+### Application
+To efficiently write data to the Redis storage, the crawler script that will get data from LeetCode need to be as near as possible to the storage.
+I chose to create an Azure WebApp, written in Python 3. Inside it I can have two rest endpoints: one public to present the data and one private (password protected) to manage the updates on Redis.  
+It's very easy to create a Python app on Azure, here is an example: https://docs.microsoft.com/en-us/azure/app-service/containers/quickstart-python?tabs=bash
+I started from this example and extended for my purposes. The required Python package are listed in **requirements.txt** file, while the REST server is defined into **application.py** file (it uses Flask as WebService).  
+It is very easy to test it on localhost using the following commands:  
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+export FLASK_APP=application.py
+flask run
+```
+The Redis storage need to be manually created using an Azure subscription.  
+There are also some parameters that need to be set in a config file: Redis hostname and key, administrator user and password (will be used for the basic authentication of the private part of WebApp). I created the **config-sample.ini** file, it needs to be populated and renamed to **config.ini**.  
+Once locally tested, the WebApp can be deplyed on Azure. the easiest way to start is using the [Azure Command-Line Interface](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest):
+```
+az login
+az webapp up --sku F1 -n <app-name>
+```
