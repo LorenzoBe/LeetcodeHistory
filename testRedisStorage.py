@@ -17,7 +17,7 @@ class TestRedisStorage(unittest.TestCase):
         # delete any previous record
         redis.deleteContest(contestTitle)
 
-        # tore the contest
+        # store the contest
         redis.addContest(contestTitle, json.dumps(contestDetails))
 
         # download and compare
