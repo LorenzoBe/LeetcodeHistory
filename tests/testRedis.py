@@ -4,7 +4,7 @@ import redis
 import unittest
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('../config.ini')
 redisHostname = config['Azure']['RedisHostname']
 redisKey = config['Azure']['RedisKey']
 

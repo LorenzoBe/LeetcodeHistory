@@ -1,5 +1,7 @@
+import sys
 import unittest
 
+sys.path.append('../')
 from dataPusher import DataPusher
 from leetcode import Contest
 

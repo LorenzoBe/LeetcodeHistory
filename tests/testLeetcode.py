@@ -1,6 +1,8 @@
+import sys
 import time
 import unittest
 
+sys.path.append('../')
 from leetcode import Contest
 from leetcode import PageSniffer
 from leetcode import LeetCodeCrawler

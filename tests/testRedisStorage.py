@@ -1,6 +1,8 @@
 import json
+import sys
 import unittest
 
+sys.path.append('../')
 from redisStorage import RedisStorage
 
 class TestRedisStorage(unittest.TestCase):
