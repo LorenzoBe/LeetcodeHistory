@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 from flask import Flask
+from flask import render_template
 from flask import request
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -62,3 +63,20 @@ def getUser():
 @auth.login_required
 def root():
     return app.send_static_file('index.html')
+
+@app.route('/test')
+@auth.login_required
+def test():
+    username = request.args.get('username', type = str)
+
+    if (username == None):
+        return "Errors in GET arguments. Required: 'username'"
+
+    userRanks = dataProxy.getUser(username)
+    result = {}
+    result['ranks'] = []
+    for rank in  userRanks:
+        result['ranks'].append(json.loads(rank.decode()))
+    jsonData = json.dumps(result)
+
+    return render_template('test.html', result = jsonData)

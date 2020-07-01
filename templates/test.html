@@ -1,0 +1,7 @@
+<html><body>
+<p>{{ result|safe }}</p>
+<script>
+var data = JSON.parse('{{ result|safe }}');
+console.log(data.ranks[0].id);
+</script>
+</body></html>
