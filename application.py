@@ -51,9 +51,10 @@ def getUser():
         dataProxy = DataProxy(config)
         userRanks = dataProxy.getUser(username)
 
-        result = []
+        result = {}
+        result['ranks'] = []
         for rank in  userRanks:
-            result.append(rank.decode())
+            result['ranks'].append(json.loads(rank.decode()))
         return json.dumps(result)
 
     return "Errors in GET arguments. Required: 'username'"

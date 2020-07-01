@@ -1,3 +1,4 @@
+import configparser
 import json
 import sys
 import unittest
@@ -8,7 +9,9 @@ from redisStorage import RedisStorage
 class TestRedisStorage(unittest.TestCase):
 
     def test_insert_contest(self):
-        redis = RedisStorage()
+        config = configparser.ConfigParser()
+        config.read('../config.ini')
+        redis = RedisStorage(config)
 
         contestDetails = {
             'title': 'Biweekly Contest 29',
@@ -31,7 +34,9 @@ class TestRedisStorage(unittest.TestCase):
 
 
     def test_insert_user_contests(self):
-        redis = RedisStorage()
+        config = configparser.ConfigParser()
+        config.read('../config.ini')
+        redis = RedisStorage(config)
 
         username = 'terence'
         contestsData = [
