@@ -30,33 +30,33 @@ def addContest():
     contestType = request.args.get('type', default = 'standard', type = str)
     contestId = request.args.get('id', type = int)
 
-    if (contestType != None and contestId != None):
-        res = False
+    if (contestType == None or contestId == None):
+        return "Errors in GET arguments. Required: 'type' and 'id'"
 
-        if contestType == 'standard':
-            res = dataProxy.pushContest(Contest.STANDARD, contestId)
-        elif contestType == 'biweekly':
-            res = dataProxy.pushContest(Contest.BIWEEKLY, contestId)
+    res = False
 
-        return "Function executed: " + str(res)
+    if contestType == 'standard':
+        res = dataProxy.pushContest(Contest.STANDARD, contestId)
+    elif contestType == 'biweekly':
+        res = dataProxy.pushContest(Contest.BIWEEKLY, contestId)
 
-    return "Errors in GET arguments. Required: 'type' and 'id'"
+    return "Function executed: " + str(res)
 
 @app.route('/getUser')
 @auth.login_required
 def getUser():
     username = request.args.get('username', type = str)
 
-    if (username != None):
-        userRanks = dataProxy.getUser(username)
+    if (username == None):
+        "Errors in GET arguments. Required: 'username'"
 
-        result = {}
-        result['ranks'] = []
-        for rank in  userRanks:
-            result['ranks'].append(json.loads(rank.decode()))
-        return json.dumps(result)
+    userRanks = dataProxy.getUser(username)
+    result = {}
+    result['ranks'] = []
+    for rank in  userRanks:
+        result['ranks'].append(json.loads(rank.decode()))
 
-    return "Errors in GET arguments. Required: 'username'"
+    return json.dumps(result)
 
 @app.route('/')
 @auth.login_required
