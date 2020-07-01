@@ -12,6 +12,7 @@ app = Flask(__name__)
 auth = HTTPBasicAuth()
 config = ConfigParser()
 config.read('config.ini')
+dataProxy = DataProxy(config)
 
 users = {
     config['Azure']['AdminUsername']: generate_password_hash(config['Azure']['AdminPassword']),
@@ -30,7 +31,6 @@ def addContest():
     contestId = request.args.get('id', type = int)
 
     if (contestType != None and contestId != None):
-        dataProxy = DataProxy(config)
         res = False
 
         if contestType == 'standard':
@@ -48,7 +48,6 @@ def getUser():
     username = request.args.get('username', type = str)
 
     if (username != None):
-        dataProxy = DataProxy(config)
         userRanks = dataProxy.getUser(username)
 
         result = {}
