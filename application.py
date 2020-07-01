@@ -15,7 +15,7 @@ config.read('config.ini')
 dataProxy = DataProxy(config)
 
 users = {
-    config['Azure']['AdminUsername']: generate_password_hash(config['Azure']['AdminPassword']),
+    config['WebApp']['AdminUsername']: generate_password_hash(config['WebApp']['AdminPassword']),
 }
 
 @auth.verify_password
@@ -57,3 +57,8 @@ def getUser():
         return json.dumps(result)
 
     return "Errors in GET arguments. Required: 'username'"
+
+@app.route('/')
+@auth.login_required
+def root():
+    return app.send_static_file('index.html')
