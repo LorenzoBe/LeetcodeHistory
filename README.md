@@ -58,3 +58,11 @@ Once locally tested, the WebApp can be deplyed on Azure. the easiest way to star
 az login
 az webapp up --sku F1 -n <app-name>
 ```
+
+There is one important notice about how the Flask service is deplyed on Azure Web App. For production deployement, it's recommended to deploy Flask with just a single working thread. This means that it must serialise all requests. This is particulary bad in this project because the request which updates the storage with a new contest takes a lot of time (~1 min).  
+On Azure Flask is deployed using [Gunicorn]{https://docs.gunicorn.org/en/stable/settings.html}, which should support multiple workers, but I observed that it was not possible to execute requests in parallel.  
+After a lot of investigations I found that we can specify the Gunicorn starting parameters simply uploading a **startup.txt** file aside the others adn referring to it in the Azure Web App configuration, as described in [Configure a custom startup file for Python apps on Azure App Service]{https://docs.microsoft.com/en-us/azure/developer/python/tutorial-deploy-app-service-on-linux-04}.  
+I logged into the Azure Portal, opened the SSH console of the Web App, found the script which is starting Gunicorn and extended the parameters with the **workers** option. This is the content of my **startup.txt** file:
+```
+GUNICORN_CMD_ARGS="--timeout 600 --access-logfile '-' --error-logfile '-' --bind=0.0.0.0:8000 --chdir=/home/site/wwwroot --workers=4" gunicorn application:app
+```
