@@ -18,11 +18,13 @@
     var contestRanks = [];
     var contestIds = [];
     var contestScores = [];
+    var contestFinishTime = [];
     var contestURLs= [];
     for (var i = 0; i < userDetails.ranks.length; ++i) {
         contestRanks.push(userDetails.ranks[i]['r']);
         contestIds.push(userDetails.ranks[i]['id']);
         contestScores.push(userDetails.ranks[i]['s']);
+        contestFinishTime.push(userDetails.ranks[i]['ft'] - userDetails.ranks[i]['ts']);
         contestURLs.push('https://leetcode.com/contest/' + userDetails.ranks[i]['id'] + '/ranking');
     }
 
@@ -31,6 +33,16 @@
 
         datasets=[];
         // ARRAY FOR DATASETS
+        var scoreDataset=[{
+              label: 'Score',
+              data: contestScores,
+              links: contestURLs,
+              borderColor: window.chartColors.yellow,
+              backgroundColor: 'rgba(0, 0, 0, 0)',
+              fill: false,
+              lineTension: 0,
+              yAxisID: 'scoreAxis'
+        }];
         var rankDataset=[{
               label: 'Rank',
               data: contestRanks,
@@ -38,19 +50,23 @@
               borderColor: window.chartColors.green,
               backgroundColor: 'rgba(0, 0, 0, 0)',
               fill: false,
-              lineTension: 0
+              lineTension: 0,
+              yAxisID: 'rankAxis'
         }];
-        var scoreDataset=[{
-              label: 'Score',
-              data: contestScores,
+        var timeDataset=[{
+              label: 'Finish Time',
+              data: contestFinishTime,
               links: contestURLs,
               borderColor: window.chartColors.red,
               backgroundColor: 'rgba(0, 0, 0, 0)',
               fill: false,
-              lineTension: 0
+              lineTension: 0,
+              yAxisID: 'timeAxis'
         }];
+
+        datasets = $.merge(scoreDataset, datasets);
         datasets = $.merge(rankDataset, datasets);
-        //datasets = $.merge(scoreDataset, datasets);
+        datasets = $.merge(timeDataset, datasets);
 
         // CHART JS INIT
         var chartType= 'line';
@@ -68,7 +84,22 @@
                     text: 'LeetCode Contests History'
                 },
                 tooltips: {
-                    mode: 'index'
+                    callbacks: {
+                      label: function(tooltipItem, data) {
+                        var datasetIndex = tooltipItem.datasetIndex;
+                        var index = tooltipItem.index;
+                        var value = data.datasets[datasetIndex].data[index];
+                        var label = data.datasets[datasetIndex].label;
+
+                        if (datasetIndex == 0) {
+                            var date = new Date(0);
+                            date.setSeconds(value); // specify value for SECONDS here
+                            return label + ': ' + date.toISOString().substr(11, 8);
+                        }
+
+                        return label + ': ' + value.toString();
+                      }
+                    } // end callbacks:
                 },
                 scales: {
                     xAxes: [{
@@ -83,6 +114,8 @@
                         }
                     }],
                     yAxes: [{
+                        id: 'rankAxis',
+                        position: 'left',
                         display: true,
                         scaleLabel: {
                             display: true,
@@ -91,6 +124,39 @@
                         ticks: {
                             suggestedMin: 0,
                             suggestedMax: 200,
+                        },
+                    }, {
+                        id: 'scoreAxis',
+                        position: 'right',
+                        display: false,
+                        scaleLabel: {
+                            display: false,
+                            labelString: 'Score'
+                        },
+                        ticks: {
+                            suggestedMin: 0,
+                            suggestedMax: 30,
+                        },
+                        gridLines: {
+                            drawOnChartArea: false,
+                        }
+                    }, {
+                        id: 'timeAxis',
+                        position: 'right',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Finish Time'
+                        },
+                        ticks: {
+                          callback: value => {
+                            var date = new Date(0);
+                            date.setSeconds(value); // specify value for SECONDS here
+                            return date.toISOString().substr(11, 8);
+                          }
+                        },
+                        gridLines: {
+                            drawOnChartArea: false,
                         }
                     }]
                 }
