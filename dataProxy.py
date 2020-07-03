@@ -25,7 +25,7 @@ class DataProxy():
         ranks = self.leetcode.getContestRankFull(contestId)
 
         for userRank in ranks:
-            username, result = self.leetcode.resultToJson(contestId, userRank)
+            username, result = self.leetcode.resultToJson(contestId, userRank, contest['start_time'])
             self.redis.addContestResult(username, result)
 
         return True

@@ -5,6 +5,7 @@ from flask import request
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
+import operator
 
 from dataProxy import DataProxy
 from leetcode import Contest
@@ -94,6 +95,8 @@ def test2():
     result['ranks'] = []
     for rank in  userRanks:
         result['ranks'].append(json.loads(rank.decode()))
+    # sort by contest timestamp
+    result['ranks'].sort(key = operator.itemgetter('ts'))
     jsonData = json.dumps(result)
 
     return render_template('test2.html', result = jsonData)

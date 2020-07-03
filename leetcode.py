@@ -70,11 +70,12 @@ class LeetCodeCrawler:
         jsonData = json.dumps(pyData)
         return jsonData
 
-    def resultToJson(self, contestId, result):
+    def resultToJson(self, contestId, result, timestamp = 0):
         username = result['username']
 
         pyResult = {}
         pyResult['id'] = contestId
+        pyResult['ts'] = timestamp
         pyResult['r'] = result['rank']
         pyResult['s'] = result['score']
         pyResult['ft'] = result['finish_time']
