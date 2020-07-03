@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>LeetCode Contests History - Author: Lorenzo Bertelli</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="/static/Chart.min.js"></script>
+  <script src="/static/utils.js"></script>
+</head>
+
+<body>
+  <div style="width:75%;">
+    <canvas class="chartjs">
+    </canvas>
+  </div>
+  <script>
+    var userDetails = JSON.parse('{{ result|safe }}');
+    var contestRanks = [];
+    var contestIds = [];
+    var contestScores = [];
+    var contestURLs= [];
+    for (var i = 0; i < userDetails.ranks.length; ++i) {
+        contestRanks.push(userDetails.ranks[i]['r']);
+        contestIds.push(userDetails.ranks[i]['id']);
+        contestScores.push(userDetails.ranks[i]['s']);
+        contestURLs.push('https://leetcode.com/contest/' + userDetails.ranks[i]['id'] + '/ranking');
+    }
+
+    if ($(".chartjs").length > 0){
+      $( ".chartjs" ).each(function() {
+
+        datasets=[];
+        // ARRAY FOR DATASETS
+        var rankDataset=[{
+              label: 'Rank',
+              data: contestRanks,
+              links: contestURLs,
+              borderColor: window.chartColors.green,
+              backgroundColor: 'rgba(0, 0, 0, 0)',
+              fill: false,
+              lineTension: 0
+        }];
+        var scoreDataset=[{
+              label: 'Score',
+              data: contestScores,
+              links: contestURLs,
+              borderColor: window.chartColors.red,
+              backgroundColor: 'rgba(0, 0, 0, 0)',
+              fill: false,
+              lineTension: 0
+        }];
+        datasets = $.merge(rankDataset, datasets);
+        //datasets = $.merge(scoreDataset, datasets);
+
+        // CHART JS INIT
+        var chartType= 'line';
+        var chartLabels= contestIds;
+        var myChart = new Chart(this, {
+            type: chartType,
+            data: {
+                labels: chartLabels,
+                datasets: datasets,
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'LeetCode Contests History'
+                },
+                tooltips: {
+                    mode: 'index'
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Rank'
+                        },
+                        ticks: {
+                            suggestedMin: 0,
+                            suggestedMax: 200,
+                        }
+                    }]
+                }
+            }
+        });  
+
+        $(this).on('click', function(evt){
+            var activePoint = myChart.getElementAtEvent(evt);
+            if(activePoint[0]){
+              var URL = myChart.data.datasets[activePoint[0]._datasetIndex].links[activePoint[0]._index];
+              console.log(URL);
+              window.open(URL, '_blank');
+            }
+        });
+      });
+    }
+  </script>
+</body>
+
+</html>

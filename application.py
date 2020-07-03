@@ -80,3 +80,20 @@ def test():
     jsonData = json.dumps(result)
 
     return render_template('test.html', result = jsonData)
+
+@app.route('/test2')
+@auth.login_required
+def test2():
+    username = request.args.get('username', type = str)
+
+    if (username == None):
+        return "Errors in GET arguments. Required: 'username'"
+
+    userRanks = dataProxy.getUser(username)
+    result = {}
+    result['ranks'] = []
+    for rank in  userRanks:
+        result['ranks'].append(json.loads(rank.decode()))
+    jsonData = json.dumps(result)
+
+    return render_template('test2.html', result = jsonData)
