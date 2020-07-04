@@ -4,6 +4,9 @@ config.ini
 # MACOS files
 .DS_Store
 
+# Azure files
+.azure
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
