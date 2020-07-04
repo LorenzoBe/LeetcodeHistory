@@ -6,15 +6,34 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="/static/Chart.min.js"></script>
   <script src="/static/utils.js"></script>
+  <style>
+    #canvas_container {
+      width:90%;
+      text-align: center;
+      margin: auto;
+    }
+    header {
+      text-align: center;
+    }
+    footer {
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
-  <div style="width:75%;">
+  <header>
+    <h1 >LeetCode Contests History: {{ usernamePlaceholder|safe }}</h1>
+    <form action="/" method="GET">
+      <input id="username" name="username" type="text" size=100 placeholder="Type here the LeetCode username (case sensitive)"/>
+    </header>
+  </div>
+  <div id="canvas_container">
     <canvas class="chartjs">
     </canvas>
   </div>
   <script>
-    var userDetails = JSON.parse('{{ result|safe }}');
+    var userDetails = JSON.parse('{{ ranksPlaceholder|safe }}');
     var contestRanks = [];
     var contestIds = [];
     var contestScores = [];
@@ -80,7 +99,7 @@
             options: {
                 responsive: true,
                 title: {
-                    display: true,
+                    display: false,
                     text: 'LeetCode Contests History'
                 },
                 tooltips: {
@@ -93,7 +112,7 @@
 
                         if (datasetIndex == 0) {
                             var date = new Date(0);
-                            date.setSeconds(value); // specify value for SECONDS here
+                            date.setSeconds(value);
                             return label + ': ' + date.toISOString().substr(11, 8);
                         }
 
@@ -108,9 +127,9 @@
                             display: true
                         },
                         ticks: {
-                            autoSkip: false,
-                            maxRotation: 45,
-                            minRotation: 45
+                            autoSkip: true,
+                            maxRotation: 60,
+                            minRotation: 60
                         }
                     }],
                     yAxes: [{
@@ -151,7 +170,7 @@
                         ticks: {
                           callback: value => {
                             var date = new Date(0);
-                            date.setSeconds(value); // specify value for SECONDS here
+                            date.setSeconds(value);
                             return date.toISOString().substr(11, 8);
                           }
                         },
@@ -175,5 +194,12 @@
     }
   </script>
 </body>
+
+<footer>
+  <p>2020 LorenzoBe</p>
+  <p>GitHub Repository: <a href="https://github.com/LorenzoBe/LeetcodeHistory" target="_blank">https://github.com/LorenzoBe/LeetcodeHistory</a></p>
+  <a href='https://www.stat-counter.org/'>stat-counter.org</a> <script type='text/javascript' src='https://www.freevisitorcounters.com/auth.php?id=a4fcb4a78aa0a48eb32f9782b8ac1517fa6702e8'></script>
+  <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/715107/t/1"></script>
+</footer>
 
 </html>

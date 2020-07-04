@@ -61,12 +61,11 @@ def getUser():
     return json.dumps(result)
 
 @app.route('/')
-@auth.login_required
 def root():
     username = request.args.get('username', type = str)
 
     if (username == None):
-        return "Errors in GET arguments. Required: 'username'"
+        username = 'bertelli'
 
     userRanks = dataProxy.getUser(username)
     result = {}
@@ -77,4 +76,4 @@ def root():
     result['ranks'].sort(key = operator.itemgetter('ts'))
     jsonData = json.dumps(result)
 
-    return render_template('index.html', result = jsonData)
+    return render_template('index.html', ranksPlaceholder = jsonData, usernamePlaceholder = username)
