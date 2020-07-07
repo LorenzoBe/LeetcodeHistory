@@ -4,8 +4,11 @@ from flask import render_template
 from flask import request
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
+import glob
 import json
 import operator
+import os.path
+import time
 
 from dataProxy import DataProxy
 from leetcode import Contest
@@ -41,6 +44,31 @@ def addContest():
         res = dataProxy.pushContest(Contest.STANDARD, contestId)
     elif contestType == 'biweekly':
         res = dataProxy.pushContest(Contest.BIWEEKLY, contestId)
+
+    return "Function executed: " + str(res)
+
+@app.route('/export')
+@auth.login_required
+def exportStorage():
+    exportFileName = request.args.get('filename', default = 'backup-{}.p'.format(int(time.time())), type = str)
+
+    res = dataProxy.exportStorage(exportFileName)
+
+    return "Function executed: " + str(res)
+
+@app.route('/import')
+@auth.login_required
+def importStorage():
+    defaultFileName = ''
+    backupFiles = sorted(glob.glob('backup-*.p'))
+    if len(backupFiles) > 0:
+        defaultFileName = backupFiles[-1]
+
+    importFileName = request.args.get('filename', default = defaultFileName, type = str)
+
+    res = False
+    if (os.path.exists(importFileName) and os.path.isfile(importFileName)):
+        res = dataProxy.importStorage(importFileName)
 
     return "Function executed: " + str(res)
 
