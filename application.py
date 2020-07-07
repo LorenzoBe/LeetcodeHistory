@@ -4,10 +4,8 @@ from flask import render_template
 from flask import request
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
-import glob
 import json
 import operator
-import os.path
 import time
 
 from dataProxy import DataProxy
@@ -59,16 +57,10 @@ def exportStorage():
 @app.route('/import')
 @auth.login_required
 def importStorage():
-    defaultFileName = ''
-    backupFiles = sorted(glob.glob('backup-*.p'))
-    if len(backupFiles) > 0:
-        defaultFileName = backupFiles[-1]
-
-    importFileName = request.args.get('filename', default = defaultFileName, type = str)
-
+    importFileName = request.args.get('filename', default = '', type = str)
     res = False
-    if (os.path.exists(importFileName) and os.path.isfile(importFileName)):
-        res = dataProxy.importStorage(importFileName)
+
+    res = dataProxy.importStorage(importFileName)
 
     return "Function executed: " + str(res)
 

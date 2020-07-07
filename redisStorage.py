@@ -1,8 +1,10 @@
 from configparser import ConfigParser
+import glob
 import json
 import pickle
 import redis
 import sys
+import time
 
 from storage import StorageInterface
 
@@ -17,6 +19,7 @@ class RedisStorage(StorageInterface):
 
         self.contestKey = 'contests'
         self.userKeyPrefix = 'userId:'
+        self.lockKeyName = 'lock'
 
     def getClient(self):
         return self.redisClient
@@ -75,6 +78,13 @@ class RedisStorage(StorageInterface):
 
     def importStorage(self, fileName: str) -> bool:
 
+        if fileName == '':
+            backupFiles = sorted(glob.glob('backup-*.p'))
+            if len(backupFiles) > 0:
+                fileName = backupFiles[-1]
+            else:
+                return False
+
         f = open(fileName, "rb")
         binaryContentReloaded = pickle.load(f)
         f.close()
@@ -88,3 +98,21 @@ class RedisStorage(StorageInterface):
         pipe.execute()
 
         return True
+
+    def acquireLock(self, timeoutS: int):
+        currTime = str(time.time())
+        res = self.redisClient.set(name=self.lockKeyName, value=currTime, ex=timeoutS, nx=True)
+
+        return res, currTime
+
+    def releaseLock(self, token):
+        currToken = self.redisClient.get(name=self.lockKeyName).decode()
+        print('Tokens: {} {}'.format(currToken, token))
+        if currToken == token:
+            self.redisClient.delete(self.lockKeyName)
+            return True
+
+        return False
+
+    def isEmpty(self):
+        return self.redisClient.dbsize() == 0
