@@ -13,18 +13,21 @@ class RedisStorage(StorageInterface):
 
         self.redisClient = redis.StrictRedis(host=redisHostname, port=6380, password=redisKey, ssl=True)
 
-        self.contestKeyPrefix = 'contestId:'
+        self.contestKey = 'contests'
         self.userKeyPrefix = 'userId:'
 
-    def addContest(self, contestTitle: str, details: str) -> bool:
-        self.redisClient.set(self.contestKeyPrefix + contestTitle, details)
+    def getClient(self):
+        return self.redisClient
+
+    def addContest(self, details: str) -> bool:
+        self.redisClient.rpush(self.contestKey, details)
         return True
 
-    def getContest(self, contestTitle: str) -> str:
-        return self.redisClient.get(self.contestKeyPrefix + contestTitle)
+    def getContests(self) -> list:
+        return self.redisClient.lrange(self.contestKey, 0, -1)
 
-    def deleteContest(self, contestTitle: str) -> bool:
-        return self.redisClient.delete(self.contestKeyPrefix + contestTitle)
+    def deleteContests(self) -> bool:
+        return self.redisClient.delete(self.contestKey)
 
     def addContestResult(self, username: str, result: str) -> bool:
         self.redisClient.rpush(self.userKeyPrefix + username, result)

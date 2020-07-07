@@ -64,8 +64,12 @@ class LeetCodeCrawler:
 
     def contestToJson(self, contestData):
         pyData = {}
+        # contest title
         pyData['t'] = contestData['title']
+        # contest start time
         pyData['st'] = contestData['start_time']
+        # import time
+        pyData['it'] = time.time()
 
         jsonData = json.dumps(pyData)
         return jsonData

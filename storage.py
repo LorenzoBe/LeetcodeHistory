@@ -1,14 +1,14 @@
 class StorageInterface:
-    def addContest(self, contestTitle: str, details: str) -> bool:
+    def addContest(self, details: str) -> bool:
         """Add a contest."""
         pass
 
-    def getContest(self, contestTitle: str) -> str:
-        """Return the contest details."""
+    def getContests(self) -> list:
+        """Return all the contest details."""
         pass
 
-    def deleteContest(self, contestTitle: str) -> bool:
-        """Delete the contest"""
+    def deleteContests(self) -> bool:
+        """Delete all the contests"""
         pass
 
     def addContestResult(self, username: str, result: str) -> bool:
