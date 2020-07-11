@@ -83,6 +83,8 @@ def getUser():
 @app.route('/')
 def root():
     username = request.args.get('username', type = str)
+    contestBlacklist = request.args.get('blacklist', default = '', type = str)
+    contestBlacklistSet = set(contestBlacklist.split(';'))
 
     if (username == None):
         username = 'bertelli'
@@ -91,7 +93,9 @@ def root():
     result = {}
     result['ranks'] = []
     for rank in  userRanks:
-        result['ranks'].append(json.loads(rank.decode()))
+        rankData = json.loads(rank.decode())
+        if rankData['id'] not in contestBlacklistSet:
+            result['ranks'].append(rankData)
     # sort by contest timestamp
     result['ranks'].sort(key = operator.itemgetter('ts'))
     jsonData = json.dumps(result)

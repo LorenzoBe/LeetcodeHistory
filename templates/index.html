@@ -19,16 +19,76 @@
     footer {
       text-align: center;
     }
+
+    #helpDiv {
+      width: 100%;
+      padding: 10px 0;
+      text-align: center;
+      background-color: lightblue;
+      margin-top: 10px;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    th {
+      background: rgb(79, 188, 224);
+    }
+    th, td {
+      border: 1px solid rgb(79, 188, 224);
+      padding: 8px;
+    }
+    tr:nth-child(even) {
+      background: rgb(197, 224, 233)
+    }
+    tr:nth-child(odd) {
+      background: rgb(154, 208, 226)
+    }
+    tr:hover {
+      background: #d1d1d1;
+    }
   </style>
 </head>
 
 <body>
   <header>
     <h1 >LeetCode Contests History: {{ usernamePlaceholder|safe }}</h1>
-    <form action="/" method="GET">
-      <input id="username" name="username" type="text" size=100 placeholder="Type here the LeetCode username (case sensitive)"/>
-    </header>
-  </div>
+    <p>
+      <button onclick="showHelp()">How to use?</button>
+    </p>
+    <div id="helpDiv" style="display: none;">
+      <p>
+        <h2>Usage</h2>
+        <p>
+          You can search using the textbox below or bookmark a direct link to <a href="https://leetcodehistory.azurewebsites.net/">https://leetcodehistory.azurewebsites.net/</a>. These are the supported parameters:
+        </p>
+        <p>
+          <table>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+            </tr>
+            <tr>
+              <td>username</td>
+              <td>LeetCode username (e.g. username=bertelli)</td>
+            </tr>
+            <tr>
+              <td>blacklist</td>
+              <td>Semicolon separated contest IDs to hide (e.g. blacklist=weekly-contest-164;biweekly-contest-29)</td>
+            </tr>
+          </table>
+        </p>
+        e.g. <a href="https://leetcodehistory.azurewebsites.net/?username=bertelli&blacklist=weekly-contest-164;biweekly-contest-29">https://leetcodehistory.azurewebsites.net/?username=bertelli&blacklist=weekly-contest-164;biweekly-contest-29</a>
+      </p>
+    </div>
+    <p>
+      <form action="/" method="GET">
+        <input id="username" name="username" type="text" size=100 placeholder="Type here the LeetCode username (case sensitive)"/>
+      </form>
+    </p>
+  </header>
   <div id="canvas_container">
     <canvas class="chartjs">
     </canvas>
@@ -193,6 +253,16 @@
             }
         });
       });
+    }
+  </script>
+  <script>
+    function showHelp() {
+      var x = document.getElementById("helpDiv");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
     }
   </script>
 </body>
