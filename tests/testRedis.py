@@ -5,10 +5,12 @@ import unittest
 
 config = configparser.ConfigParser()
 config.read('../config.ini')
-redisHostname = config['Azure']['RedisHostname']
-redisKey = config['Azure']['RedisKey']
+redisHostname = config['Redis']['Hostname']
+redisKey = config['Redis']['Key']
+redisPort = int(self.config['Redis']['Port'])
+redisSSL = self.config['Redis']['SSL'] == 'True'
 
-r = redis.StrictRedis(host=redisHostname, port=6380, password=redisKey, ssl=True)
+r = redis.StrictRedis(host=redisHostname, port=redisPort, password=redisKey, ssl=redisSSL)
 
 class TestRedisConnectivity(unittest.TestCase):
 

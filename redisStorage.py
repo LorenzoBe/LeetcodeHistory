@@ -12,10 +12,12 @@ class RedisStorage(StorageInterface):
 
     def __init__(self, config: ConfigParser):
         self.config = config
-        redisHostname = self.config['Azure']['RedisHostname']
-        redisKey = self.config['Azure']['RedisKey']
+        redisHostname = self.config['Redis']['Hostname']
+        redisKey = self.config['Redis']['Key']
+        redisPort = int(self.config['Redis']['Port'])
+        redisSSL = self.config['Redis']['SSL'] == 'True'
 
-        self.redisClient = redis.StrictRedis(host=redisHostname, port=6380, password=redisKey, ssl=True)
+        self.redisClient = redis.StrictRedis(host=redisHostname, port=redisPort, password=redisKey, ssl=redisSSL)
 
         self.contestKey = 'contests'
         self.userKeyPrefix = 'userId:'
@@ -85,6 +87,7 @@ class RedisStorage(StorageInterface):
             else:
                 return False
 
+        print ('Executing import of: {}'.format(fileName))
         f = open(fileName, "rb")
         binaryContentReloaded = pickle.load(f)
         f.close()
