@@ -41,6 +41,11 @@ user:1: [{"contestId": "1", "timestamp": "1111111111", "finishTime": "666", "sco
          {"contestId": "2", "timestamp": "2222222222", "finishTime": "777", "score": "23", "rank": "999"}]
 ```
 
+#### Python dictionary
+The Redis solution worked well, but I wanted to migrate the website to a free subscription.  
+There is no free tier for Redis in Azure. This is why I simply ported the same JSON structure to a simpler architecture based on Python dictionary. At the end, what we need is a simple key-value starage.  
+This solution is not persisted on disk, so we'll need a mechanism to automatically load the last backup at the right moment.
+
 ### Graph visualisation
 I don't have a big experience on data visualisation, so I will choose the first open source and well documented JavaScript library: [Chart.js](https://www.chartjs.org/).  
 
@@ -57,15 +62,16 @@ pip install -r requirements.txt
 export FLASK_APP=application.py
 flask run
 ```
-The Redis storage need to be manually created using an Azure subscription.  
+If you want to use the Redis storage, you need to manually create an instance using an Azure subscription.  
 There are also some parameters that need to be set in a config file: Redis hostname and key, administrator user and password (will be used for the basic authentication of the private part of WebApp). I created the **config-sample.ini** file, it needs to be populated and renamed to **config.ini**.  
-Once locally tested, the WebApp can be deplyed on Azure. the easiest way to start is using the [Azure Command-Line Interface](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest):
+The Python dictionary solution doesn't require any special setup.  
+Once locally tested, the WebApp can be deployed on Azure. the easiest way to start is using the [Azure Command-Line Interface](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest):
 ```
 az login
 az webapp up --sku F1 -n <app-name>
 ```
 
-There is one important notice about how the Flask service is deplyed on Azure Web App. For production deployement, it's recommended to deploy Flask with just a single working thread. This means that it must serialise all requests. This is particulary bad in this project because the request which updates the storage with a new contest takes a lot of time (~1 min).  
+There is one important notice about how the Flask service is deplyed on Azure Web App. For production deployment, it's recommended to deploy Flask with just a single working thread. This means that it must serialise all requests. This is particulary bad in this project because the request which updates the storage with a new contest takes a lot of time (~1 min).  
 On Azure Flask is deployed using [Gunicorn](https://docs.gunicorn.org/en/stable/settings.html), which should support multiple workers, but I observed that it was not possible to execute requests in parallel.  
 After a lot of investigations I found that we can specify the Gunicorn starting parameters simply uploading a **startup.txt** file aside the others adn referring to it in the Azure Web App configuration, as described in [Configure a custom startup file for Python apps on Azure App Service](https://docs.microsoft.com/en-us/azure/developer/python/tutorial-deploy-app-service-on-linux-04).  
 I logged into the Azure Portal, opened the SSH console of the Web App, found the script which is starting Gunicorn and extended the parameters with the **workers** option. This is the content of my **startup.txt** file:  
@@ -73,17 +79,18 @@ I logged into the Azure Portal, opened the SSH console of the Web App, found the
 GUNICORN_CMD_ARGS="--timeout 600 --access-logfile '-' --error-logfile '-' --bind=0.0.0.0:8000 --chdir=/home/site/wwwroot --workers=4" gunicorn application:app
 ```
 
-For the visualisation, Chart.js revealed to be a very powerful and extendible engine. I had to write custom callbacks in the configuration to create redirection to the contests when users click on one point in the graph. I also had to extend tooltips and axis to write the labels with time formatting. All the points where however solved thanks to the good documentation and huge community behind the project.
+For the visualisation, Chart.js revealed to be a very powerful and extendable engine. I had to write custom callbacks in the configuration to create redirection to the contests when users click on one point in the graph. I also had to extend tooltips and axis to write the labels with time formatting. All the points where however solved thanks to the good documentation and huge community behind the project.
 
 ## Maintenance
-The biggest problem of maintaining all the data in a Redis storage is that it is not persisted bu default. In azure there is the option to spend more and have the possibility to import/export data, persiste it on file system, server redundancy. Unfortunately I am a poor developer :D so I had to invent something to manage the server reboots, without having to spend too much (the price rises from 15 $/month to 400 $/month for the possibility to import/export).  
+The biggest problem of maintaining all the data in a Redis storage (or Python dictionary) is that it is not persisted by default. In azure there is the option to spend more and have the possibility to import/export data, persiste it on file system, server redundancy. Unfortunately I am a poor developer :D so I had to invent something to manage the server reboots, without having to spend too much (the price rises from 15 $/month to 400 $/month for the possibility to import/export).  
 I really tried hard to find a way to export or save the data: both the SAVE Redis command and the '--rdb' option of [redis-cli](https://redis.io/topics/rediscli) are disabled.  
-At the end I figured out the most simple way: read all the keys and dump them into a file. There wa however an uknown point about the performances, especially because the redis server on Azure is not hosted in the same machine of the Web App.  
-Lukily Redis supports [pipelines](https://redis.io/topics/pipelining) as a way to aggregate multiple commands (it even support transactions). Using pipelines and the smart binary serialisation of Python [pickle](https://docs.python.org/3/library/pickle.html) I was able to export 120 MB in less than one minute and re-import it in about 15 seconds. Enought to give it a try.  
-I then extended the available Web App API commands so I can remotely trigger some import/export. But there was still the problem to identify when the Redis server is rebooted (I suppose this could happen in any moment that Azure Sytem Administrators will need to reboot/move/update the hosting machine). I chose the following lazy logic, embedded in the main call to get the user contests data:
+At the end I figured out simplest way: read all the keys and dump them into a file. There wa however an unknown point about the performances, especially because the redis server on Azure is not hosted in the same machine of the Web App.  
+Luckily Redis supports [pipelines](https://redis.io/topics/pipelining) as a way to aggregate multiple commands (it even support transactions). Using pipelines and the smart binary serialisation of Python [pickle](https://docs.python.org/3/library/pickle.html) I was able to export 120 MB in less than one minute and re-import it in about 15 seconds. Enought to give it a try.  
+I then extended the available Web App API commands, so I can remotely trigger some import/export. But there was still the problem to identify when the Redis server is rebooted (I suppose this could happen in any moment that Azure Sytem Administrators will need to reboot/move/update the hosting machine). I chose the following lazy logic, embedded in the main call to get the user contests data:
 * User requests the main Web App page, which trigger the read of the user contests data from Redis
-* If the Redis storage is empty, the last backup is imported and then the data is returned (yes, there could be an unluky user that will need to wait 15 seconds before seeing the data)
-The probelm now is the concurrency: how to be sure that other users will not do the same update at the same time? I am trying to manage it using a lock on Redis itself: if the user is able to acquire the lock he will start also the import, while other users will get an error if trying to access at the same time. I implemented the lock as described [here](https://redis.io/topics/distlock#:~:text=The%20simplest%20way%20to%20use,resource%2C%20it%20deletes%20the%20key.).  
+* If the Redis storage is empty, the last backup is imported and then the data is returned (yes, there could be an unlucky user that will need to wait 15 seconds before seeing the data)
+The problem now is the concurrency: how to be sure that other users will not do the same update at the same time? I am trying to manage it using a lock on Redis itself: if the user is able to acquire the lock he will start also the import, while other users will get an error if trying to access at the same time. I implemented the lock as described [here](https://redis.io/topics/distlock#:~:text=The%20simplest%20way%20to%20use,resource%2C%20it%20deletes%20the%20key.).  
+For the Python dictionary storage solution, the lock is still not implemented. Since I am the only maintainer, who trigger the import, probably it is not even needed... :)  
 
 ## How to use it
 You can insert the username in the main textbox and press Enter. Then everything should magically work. You can also pass the username as GET propery like: [https://leetcodehistory.azurewebsites.net/?username=beet](https://leetcodehistory.azurewebsites.net/?username=beet).  

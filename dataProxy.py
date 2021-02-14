@@ -1,17 +1,15 @@
 from configparser import ConfigParser
-import json
 
 from leetcode import Contest
-from leetcode import PageSniffer
 from leetcode import LeetCodeCrawler
-from redisStorage import RedisStorage
+from pyDictStorage import PyDictStorage
 
 class DataProxy():
 
     def __init__(self, config: ConfigParser):
         self.config = config
         self.leetcode = LeetCodeCrawler(config)
-        self.storage = RedisStorage(config)
+        self.storage = PyDictStorage(config)
 
     def pushContest(self, type: Contest, id: int) -> bool:
         contestId = self.leetcode.generateContestId(type, id)
@@ -24,8 +22,8 @@ class DataProxy():
         ranks = self.leetcode.getContestRankFull(contestId)
 
         # try to acquire the lock and  store the new data
-        res, token = self.storage.acquireLock(600)
-        if not res: return False
+        #res, token = self.storage.acquireLock(600)
+        #if not res: return False
 
         self.storage.addContest(self.leetcode.contestToJson(contest))
 
@@ -33,19 +31,19 @@ class DataProxy():
             username, result = self.leetcode.resultToJson(contestId, userRank, contest['start_time'])
             self.storage.addContestResult(username, result)
 
-        self.storage.releaseLock(token)
+        #self.storage.releaseLock(token)
 
         return True
 
     def getUser(self, username: str) -> list:
         # if the storage is empty, try to recover it from the last backup
         if self.storage.isEmpty():
-            res, token = self.storage.acquireLock(240)
-            if not res:
-                return False
+            #res, token = self.storage.acquireLock(240)
+            #if not res:
+            #    return False
 
             self.storage.importStorage('')
-            self.storage.releaseLock(token)
+            #self.storage.releaseLock(token)
 
         return self.storage.getAllContestsResults(username)
 
